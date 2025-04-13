@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Leg {{ leg.leg_number }}{% endblock %}
+
+{% block content %}
+    <h1>Leg {{ leg.leg_number }} Details</h1>
+    <h2>Overview</h2>
+    <p><strong>Distance:</strong> {{ leg.distance_miles }} miles</p>
+    <p><strong>Difficulty:</strong> {{ leg.difficulty }}</p>
+    <p><strong>Description:</strong> {{ leg.leg_description }}</p>
+    
+    <h2>Exchange Points</h2>
+    <p><strong>Start:</strong> {{ leg.exchange_points.start }}</p>
+    <p><strong>End:</strong> {{ leg.exchange_points.end }}</p>
+    
+    <h2>Runner Directions</h2>
+    {% if leg.runner_directions is string %}
+        <p>{{ leg.runner_directions }}</p>
+    {% else %}
+        <ol>
+            {% for direction in leg.runner_directions %}
+                <li>{{ direction }}</li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+    
+    <h2>Van Directions</h2>
+    {% if leg.van_directions is string %}
+        <p>{{ leg.van_directions }}</p>
+    {% else %}
+        <ol>
+            {% for direction in leg.van_directions %}
+                <li>{{ direction }}</li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+    
+    <h2>Key Rules</h2>
+    {% if leg.key_rules %}
+        <ul>
+            {% for rule in leg.key_rules %}
+                <li>{{ rule }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No specific rules for this leg.</p>
+    {% endif %}
+    
+    <h2>Elevation Profile</h2>
+    <p><strong>Total Gain:</strong> {{ leg.elevation_profile.total_gain_ft }} ft</p>
+    <p><strong>Total Loss:</strong> {{ leg.elevation_profile.total_loss_ft }} ft</p>
+    
+    <p><a href="{{ url_for('legs') }}">Back to All Legs</a></p>
+{% endblock %}

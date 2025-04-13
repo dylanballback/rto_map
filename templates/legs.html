@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}All Legs{% endblock %}
+
+{% block content %}
+    <h1>All Legs - RTO 2025</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Leg Number</th>
+                <th>Distance (miles)</th>
+                <th>Difficulty</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for leg in legs %}
+                <tr>
+                    <td>{{ leg.leg_number }}</td>
+                    <td>{{ leg.distance_miles }}</td>
+                    <td>{{ leg.difficulty }}</td>
+                    <td>{{ leg.exchange_points.start }}</td>
+                    <td>{{ leg.exchange_points.end }}</td>
+                    <td><a href="{{ url_for('leg_detail', leg_number=leg.leg_number) }}">View Details</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Reno-Tahoe Odyssey 2025</h1>
+    <p>Welcome to the RTO 2025 race information page!</p>
+    <p>The Reno-Tahoe Odyssey is a 36-leg relay race starting and ending at J Resort's Glow Plaza in Reno, NV. The route covers scenic areas including Verdi, Truckee, Virginia City, Silver City, and Mound House.</p>
+    <h2>Race Overview</h2>
+    <ul>
+        <li><strong>Total Known Distance:</strong> {{ total_known_distance }} miles</li>
+        <li><strong>Estimated Distance for Missing Legs (8-28):</strong> {{ estimated_missing_distance }} miles</li>
+        <li><strong>Total Estimated Distance:</strong> {{ total_estimated_distance }} miles</li>
+    </ul>
+    <p><a href="{{ url_for('legs') }}">View All Legs</a></p>
+{% endblock %}
