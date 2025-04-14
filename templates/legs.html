@@ -4,6 +4,11 @@
 
 {% block content %}
     <h1>All Legs - RTO 2025</h1>
+
+    <h2>Interactive Map</h2>
+    <div id="map" style="height: 500px; width: 100%;"></div>
+
+    <h2>Leg Details</h2>
     <table>
         <thead>
             <tr>
@@ -28,4 +33,141 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        // Pass the legs data as a JSON string
+        const legsData = {{ legs|tojson }};
+
+        function initMap() {
+            try {
+                // Initialize the map centered on Reno, NV
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 10,
+                    center: { lat: 39.529633, lng: -119.820345 }  // Centered on J Resort's Glow Plaza
+                });
+
+                // Directions service to draw routes
+                const directionsService = new google.maps.DirectionsService();
+
+                // Array to hold all bounds for fitting the map
+                const bounds = new google.maps.LatLngBounds();
+
+                // Process each leg in JavaScript
+                legsData.forEach(leg => {
+                    // Log the leg data for debugging
+                    console.log(`Processing Leg ${leg.leg_number}: Start Lat=${leg.exchange_points.start_coords.lat}, End Lat=${leg.exchange_points.end_coords.lat}`);
+
+                    // Skip legs with missing or invalid coordinates
+                    const startLat = leg.exchange_points.start_coords.lat;
+                    const startLng = leg.exchange_points.start_coords.lng;
+                    const endLat = leg.exchange_points.end_coords.lat;
+                    const endLng = leg.exchange_points.end_coords.lng;
+
+                    if (startLat === null || startLng === null || endLat === null || endLng === null) {
+                        console.log(`Skipping Leg ${leg.leg_number} due to missing coordinates`);
+                        return; // Continue to the next leg
+                    }
+
+                    const startCoords = { lat: startLat, lng: startLng };
+                    const endCoords = { lat: endLat, lng: endLng };
+
+                    // Extend bounds to include start and end coordinates
+                    bounds.extend(startCoords);
+                    bounds.extend(endCoords);
+
+                    // Add markers for start and end points
+                    const startMarker = new google.maps.Marker({
+                        position: startCoords,
+                        map: map,
+                        title: `Leg ${leg.leg_number} Start: ${leg.exchange_points.start}`,
+                        icon: {
+                            url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                        }
+                    });
+
+                    const endMarker = new google.maps.Marker({
+                        position: endCoords,
+                        map: map,
+                        title: `Leg ${leg.leg_number} End: ${leg.exchange_points.end}`,
+                        icon: {
+                            url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                        }
+                    });
+
+                    // Draw the route using Directions API
+                    directionsService.route(
+                        {
+                            origin: startCoords,
+                            destination: endCoords,
+                            travelMode: "WALKING"  // Since this is a running race
+                        },
+                        (result, status) => {
+                            if (status === "OK") {
+                                const path = new google.maps.Polyline({
+                                    path: result.routes[0].overview_path,
+                                    geodesic: true,
+                                    strokeColor: getRandomColor(),
+                                    strokeOpacity: 0.7,
+                                    strokeWeight: 5,
+                                    map: map
+                                });
+
+                                // Info window for hover details
+                                const infoWindow = new google.maps.InfoWindow();
+
+                                // Add hover event to show leg details
+                                path.addListener("mouseover", (event) => {
+                                    infoWindow.setContent(`
+                                        <div>
+                                            <h3>Leg ${leg.leg_number}</h3>
+                                            <p><strong>Distance:</strong> ${leg.distance_miles} miles</p>
+                                            <p><strong>Difficulty:</strong> ${leg.difficulty}</p>
+                                            <p><strong>Description:</strong> ${leg.leg_description}</p>
+                                        </div>
+                                    `);
+                                    infoWindow.setPosition(event.latLng);
+                                    infoWindow.open(map);
+                                });
+
+                                path.addListener("mouseout", () => {
+                                    infoWindow.close();
+                                });
+                            } else {
+                                console.error(`Directions request failed for Leg ${leg.leg_number}: ${status}`);
+                            }
+                        }
+                    );
+                });
+
+                // Fit the map to show all legs
+                if (!bounds.isEmpty()) {
+                    map.fitBounds(bounds);
+                } else {
+                    console.warn("No valid bounds to fit the map. Check if any legs have valid coordinates.");
+                }
+            } catch (error) {
+                console.error("Error initializing map:", error);
+            }
+        }
+
+        // Function to generate random colors for each leg's polyline
+        function getRandomColor() {
+            const letters = "0123456789ABCDEF";
+            let color = "#";
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Fallback if google.maps fails to load
+        window.addEventListener('error', (event) => {
+            if (event.message.includes('google')) {
+                console.error("Failed to load Google Maps API. Please check your API key and network connection.");
+            }
+        });
+    </script>
+
+    <!-- Load Google Maps JavaScript API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ gmap_key }}&callback=initMap" async defer></script>
 {% endblock %}

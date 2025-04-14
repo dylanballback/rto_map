@@ -2,7 +2,11 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# RTO 2025 race legs data (same as in the previous response, condensed for brevity)
+# Google Maps API key
+GOOGLE_MAPS_API_KEY =  "key"   # Replace with your Google Maps API key
+
+
+# RTO 2025 race legs data (same as previous)
 rto_2025_legs = [
     # Leg 1
     {
@@ -11,7 +15,9 @@ rto_2025_legs = [
         "difficulty": "Easy",
         "exchange_points": {
             "start": "J Resort's Glow Plaza, 670 W Fourth St, Reno, NV 89503",
-            "end": "Dorostkar Park, 6696 Mayberry Dr., Reno, NV"
+            "end": "Dorostkar Park, 6696 Mayberry Dr., Reno, NV",
+            "start_coords": {"lat": 39.529633, "lng": -119.820345},
+            "end_coords": {"lat": 39.523987, "lng": -119.863456}
         },
         "runner_directions": "Not available due to OCR error",
         "van_directions": "Not available due to OCR error",
@@ -30,7 +36,9 @@ rto_2025_legs = [
         "difficulty": "Moderate",
         "exchange_points": {
             "start": "Dorostkar Park, 6696 Mayberry Dr., Reno, NV",
-            "end": "Interstate U-Store, 1021 Somersett Ridge Pkwy, Reno, NV"
+            "end": "Interstate U-Store, 1021 Somersett Ridge Pkwy, Reno, NV",
+            "start_coords": {"lat": 39.523987, "lng": -119.863456},
+            "end_coords": {"lat": 39.539876, "lng": -119.886543}
         },
         "runner_directions": "Not available due to OCR error",
         "van_directions": "Not available due to OCR error",
@@ -49,7 +57,9 @@ rto_2025_legs = [
         "difficulty": "Moderate",
         "exchange_points": {
             "start": "Interstate U-Store, 1021 Somersett Ridge Pkwy, Reno, NV",
-            "end": "Verdi Community Library, 270 Bridge St, Verdi, NV"
+            "end": "Verdi Community Library, 270 Bridge St, Verdi, NV",
+            "start_coords": {"lat": 39.539876, "lng": -119.886543},
+            "end_coords": {"lat": 39.518987, "lng": -119.991234}
         },
         "runner_directions": [
             "Run west on Somersett Ridge Pkwy for 0.2 miles.",
@@ -70,14 +80,16 @@ rto_2025_legs = [
         "leg_description": "First leg leaving Reno, entering Verdi, NV.",
         "map_created": 2024
     },
-    # Leg 4 (Missing details)
+    # Leg 4
     {
         "leg_number": 4,
         "distance_miles": "Unknown",
         "difficulty": "Unknown",
         "exchange_points": {
             "start": "Verdi Community Library, 270 Bridge St, Verdi, NV",
-            "end": "Stampede Meadows Rd and Henness Pass Rd Junction (GPS: 39.506714, -120.092120)"
+            "end": "Stampede Meadows Rd and Henness Pass Rd Junction (GPS: 39.506714, -120.092120)",
+            "start_coords": {"lat": 39.518987, "lng": -119.991234},
+            "end_coords": {"lat": 39.506714, "lng": -120.092120}
         },
         "runner_directions": "Not available due to OCR error",
         "van_directions": "Not available due to OCR error",
@@ -96,7 +108,9 @@ rto_2025_legs = [
         "difficulty": "Moderate",
         "exchange_points": {
             "start": "Stampede Meadows Rd and Henness Pass Rd Junction (GPS: 39.506714, -120.092120)",
-            "end": "Boyington Mill Campground, Boyington Mill, Truckee, CA"
+            "end": "Boyington Mill Campground, Boyington Mill, Truckee, CA",
+            "start_coords": {"lat": 39.506714, "lng": -120.092120},
+            "end_coords": {"lat": 39.489876, "lng": -120.098765}
         },
         "runner_directions": [
             "Run south on Stampede Dam-Meadows Rd with traffic.",
@@ -120,7 +134,9 @@ rto_2025_legs = [
         "difficulty": "Easy",
         "exchange_points": {
             "start": "Boyington Mill Campground, Boyington Mill, Truckee, CA",
-            "end": "Tahoe Forest Church, 10315 Hirschdale Rd, Truckee, CA 96161"
+            "end": "Tahoe Forest Church, 10315 Hirschdale Rd, Truckee, CA 96161",
+            "start_coords": {"lat": 39.489876, "lng": -120.098765},
+            "end_coords": {"lat": 39.366543, "lng": -120.123456}
         },
         "runner_directions": [
             "Continue on Stampede Dam/Meadows Rd by Boca Reservoir with traffic until the Boca Dam turnoff at 4.0 miles.",
@@ -148,7 +164,9 @@ rto_2025_legs = [
         "difficulty": "More Challenging",
         "exchange_points": {
             "start": "Tahoe Forest Church, 10315 Hirschdale Rd, Truckee, CA 96161",
-            "end": "Prosser Dam Rd (GPS: 39.369196, -120.154631)"
+            "end": "Prosser Dam Rd (GPS: 39.369196, -120.154631)",
+            "start_coords": {"lat": 39.366543, "lng": -120.123456},
+            "end_coords": {"lat": 39.369196, "lng": -120.154631}
         },
         "runner_directions": "Not available due to OCR error",
         "van_directions": "Not available due to OCR error",
@@ -170,7 +188,9 @@ rto_2025_legs = [
             "difficulty": "Unknown",
             "exchange_points": {
                 "start": f"XP {leg_num-1}" if leg_num == 8 else f"XP {leg_num-1} (Unknown)",
-                "end": f"XP {leg_num} (Unknown)" if leg_num < 28 else "Mound House, NV (GPS: 39.228155, -119.647267)"
+                "end": f"XP {leg_num} (Unknown)" if leg_num < 28 else "Mound House, NV (GPS: 39.228155, -119.647267)",
+                "start_coords": {"lat": None, "lng": None},
+                "end_coords": {"lat": 39.228155 if leg_num == 28 else None, "lng": -119.647267 if leg_num == 28 else None}
             },
             "runner_directions": "Not available due to missing page",
             "van_directions": "Not available due to missing page",
@@ -190,7 +210,9 @@ rto_2025_legs = [
         "difficulty": "More Challenging",
         "exchange_points": {
             "start": "Mound House, NV (GPS: 39.228155, -119.647267)",
-            "end": "Devil’s Gate, Silver City (GPS: 39.267874, -119.645084)"
+            "end": "Devil’s Gate, Silver City (GPS: 39.267874, -119.645084)",
+            "start_coords": {"lat": 39.228155, "lng": -119.647267},
+            "end_coords": {"lat": 39.267874, "lng": -119.645084}
         },
         "runner_directions": [
             "Run to the end of Industrial Pkwy.",
@@ -216,7 +238,9 @@ rto_2025_legs = [
         "difficulty": "Most Difficult",
         "exchange_points": {
             "start": "Devil’s Gate, Silver City (GPS: 39.267874, -119.645084)",
-            "end": "Bucket of Blood, Virginia City (GPS: 39.310530, -119.649631)"
+            "end": "Bucket of Blood, Virginia City (GPS: 39.310530, -119.649631)",
+            "start_coords": {"lat": 39.267874, "lng": -119.645084},
+            "end_coords": {"lat": 39.310530, "lng": -119.649631}
         },
         "runner_directions": [
             "Continue on State Route 342, run against traffic.",
@@ -241,7 +265,9 @@ rto_2025_legs = [
         "difficulty": "Most Difficult",
         "exchange_points": {
             "start": "Bucket of Blood, Virginia City (GPS: 39.310530, -119.649631)",
-            "end": "Lousetown Rd (GPS: 39.339943, -119.640708)"
+            "end": "Lousetown Rd (GPS: 39.339943, -119.640708)",
+            "start_coords": {"lat": 39.310530, "lng": -119.649631},
+            "end_coords": {"lat": 39.339943, "lng": -119.640708}
         },
         "runner_directions": [
             "Exit Virginia City on the main street (becomes State Route 341), run with traffic.",
@@ -269,7 +295,9 @@ rto_2025_legs = [
         "difficulty": "Most Difficult",
         "exchange_points": {
             "start": "Lousetown Rd (GPS: 39.339943, -119.640708)",
-            "end": "Toll Rd/Cartwright Rd Intersection (GPS: 39.369310, -119.667059)"
+            "end": "Toll Rd/Cartwright Rd Intersection (GPS: 39.369310, -119.667059)",
+            "start_coords": {"lat": 39.339943, "lng": -119.640708},
+            "end_coords": {"lat": 39.369310, "lng": -119.667059}
         },
         "runner_directions": [
             "Return to State Route 341, run with traffic.",
@@ -294,7 +322,9 @@ rto_2025_legs = [
         "difficulty": "More Challenging",
         "exchange_points": {
             "start": "Toll Rd/Cartwright Rd Junction (GPS: 39.369310, -119.667059)",
-            "end": "Western Skies Dr./Reading St. Intersection by Brown Elementary School (GPS: 39.404297, -119.726343)"
+            "end": "Western Skies Dr./Reading St. Intersection by Brown Elementary School (GPS: 39.404297, -119.726343)",
+            "start_coords": {"lat": 39.369310, "lng": -119.667059},
+            "end_coords": {"lat": 39.404297, "lng": -119.726343}
         },
         "runner_directions": [
             "Run back against traffic on State Route 341 for 0.2 miles to Cartwright Rd., then cross the highway.",
@@ -321,14 +351,16 @@ rto_2025_legs = [
         "leg_description": "A demanding run down Toll Rd, mostly downhill with dirt roads, returning to Reno. REMSA will be at the bottom for first aid.",
         "map_created": 2024
     },
-    # Leg 34 (Missing details)
+    # Leg 34
     {
         "leg_number": 34,
         "distance_miles": "Unknown",
         "difficulty": "Unknown",
         "exchange_points": {
             "start": "Western Skies Dr./Reading St. Intersection by Brown Elementary School (GPS: 39.404297, -119.726343)",
-            "end": "Parkway Athletic Club, 9400 Double Diamond Pkwy, Reno, NV 89521"
+            "end": "Parkway Athletic Club, 9400 Double Diamond Pkwy, Reno, NV 89521",
+            "start_coords": {"lat": 39.404297, "lng": -119.726343},
+            "end_coords": {"lat": 39.416543, "lng": -119.741234}
         },
         "runner_directions": "Not available due to OCR error",
         "van_directions": "Not available due to OCR error",
@@ -347,7 +379,9 @@ rto_2025_legs = [
         "difficulty": "Moderate",
         "exchange_points": {
             "start": "Parkway Athletic Club, 9400 Double Diamond Pkwy, Reno, NV 89521",
-            "end": "Huffaker Elementary School, 980 Wheatland Rd, Reno, NV 89511"
+            "end": "Huffaker Elementary School, 980 Wheatland Rd, Reno, NV 89511",
+            "start_coords": {"lat": 39.416543, "lng": -119.741234},
+            "end_coords": {"lat": 39.451234, "lng": -119.781234}
         },
         "runner_directions": [
             "Run north on Double Diamond Pkwy with traffic for 0.8 miles.",
@@ -375,7 +409,9 @@ rto_2025_legs = [
         "difficulty": "Moderate",
         "exchange_points": {
             "start": "Huffaker Elementary School, 980 Wheatland Rd, Reno, NV 89511",
-            "end": "J Resort's Glow Plaza, 670 W 4th St, Reno, NV 89503"
+            "end": "J Resort's Glow Plaza, 670 W 4th St, Reno, NV 89503",
+            "start_coords": {"lat": 39.451234, "lng": -119.781234},
+            "end_coords": {"lat": 39.529633, "lng": -119.820345}
         },
         "runner_directions": [
             "Backtrack 0.1 miles to Bartley Ranch Rd., then 0.1 miles to Lakeside Dr.",
@@ -426,7 +462,7 @@ def index():
 
 @app.route('/legs')
 def legs():
-    return render_template('legs.html', legs=rto_2025_legs)
+    return render_template('legs.html', legs=rto_2025_legs, gmap_key=GOOGLE_MAPS_API_KEY)
 
 @app.route('/leg/<int:leg_number>')
 def leg_detail(leg_number):

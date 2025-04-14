@@ -76,3 +76,25 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+/* Style for the map */
+#map {
+    margin-bottom: 20px;
+}
+
+/* Style for info windows */
+.gm-style-iw {
+    padding: 10px;
+    max-width: 300px;
+}
+
+.gm-style-iw h3 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    color: #333;
+}
+
+.gm-style-iw p {
+    margin: 5px 0;
+    font-size: 14px;
+}
